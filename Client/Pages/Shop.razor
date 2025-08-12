@@ -1,0 +1,28 @@
+@page "/shop"
+
+@using ShopEase.Shared.Models
+@using ShopEase.Client.Components
+
+<div class="container">
+    <h3 class="mb-4">Shop</h3>
+
+    <div class="product-grid">
+        @foreach (var product in products)
+        {
+            <div class="product-card">
+                <ProductCard Product="product" />
+            </div>
+        }
+    </div>
+</div>
+
+
+@code {
+    private List<Product> products = new()
+    {
+        new Product { ProductID = 1, Name = "Laptop", Price = 999.99m, Category = "Electronics" },
+        new Product { ProductID = 2, Name = "Headphones", Price = 120.99m, Category = "Electronics" },
+        new Product { ProductID = 3, Name = "Sneakers", Price = 79.99m, Category = "Footwear" },
+        new Product { ProductID = 4, Name = "Coffee Mug", Price = 12.50m, Category = "Kitchen" }
+    };
+}

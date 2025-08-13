@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,13 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 .AddErrorDescriber<CustomIdentityErrorDescriber>()
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders(); // ✅ This is the key fix
+
+builder.Services.ConfigureApplicationCookie(options => {
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.SlidingExpiration = true;
+});
 
 builder.Services.AddAuthentication("Identity.Application")
     .AddCookie();

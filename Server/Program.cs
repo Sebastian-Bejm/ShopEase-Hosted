@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -37,6 +38,7 @@ builder.Services.ConfigureApplicationCookie(options => {
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Strict;
     options.SlidingExpiration = true;
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
 });
 
 builder.Services.AddCors(options =>

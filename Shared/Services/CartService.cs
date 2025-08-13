@@ -2,14 +2,65 @@ using System.Collections.Generic;
 using System.Linq;
 using ShopEase.Shared.Models;
 using Microsoft.JSInterop;
+using System.Threading.Tasks;
 
 namespace ShopEase.Shared.Services
 {
+    public class CartItemDto
+    {
+        public int ProductID { get; set; }
+        public Product Product { get; set; } = new();
+        public int Quantity { get; set; }
+    }
+
     public class CartService {
         private Dictionary<int, (Product Product, int Quantity)> cartItems = new();
 
         public IEnumerable<(int ProductID, Product Product, int Quantity)> CartItems =>
         cartItems.Select(kvp => (kvp.Key, kvp.Value.Product, kvp.Value.Quantity));
+
+        private readonly IJSRuntime js;
+        private const string StorageKey = "cartItems";
+
+        public CartService(IJSRuntime jsRuntime)
+        {
+            js = jsRuntime;
+            LoadCartFromStorage();
+        }
+
+        private async Task SaveCartToStorageAsync()
+        {
+            var cartDtoList = cartItems.Select(kvp => new CartItemDto
+            {
+                ProductID = kvp.Key,
+                Product = kvp.Value.Product,
+                Quantity = kvp.Value.Quantity
+            }).ToList();
+
+            await js.InvokeVoidAsync("localStorage.setItem", StorageKey,
+                System.Text.Json.JsonSerializer.Serialize(cartDtoList));
+        }
+
+        private async void LoadCartFromStorage()
+        {
+            try
+            {
+                var json = await js.InvokeAsync<string>("localStorage.getItem", StorageKey);
+                if (!string.IsNullOrEmpty(json))
+                {
+                    var items = System.Text.Json.JsonSerializer.Deserialize<List<CartItemDto>>(json);
+                    if (items != null)
+                    {
+                        cartItems = items.ToDictionary(
+                            item => item.ProductID,
+                            item => (item.Product, item.Quantity)
+                        );
+                    }
+                }
+            }
+            catch { /* handle errors if needed */ }
+        }
+
 
         public void AddProduct(Product product)
         {
@@ -22,6 +73,7 @@ namespace ShopEase.Shared.Services
             {
                 cartItems[product.ProductID] = (product, 1);
             }
+            _ = SaveCartToStorageAsync();
         }
 
         public void RemoveProduct(int productId) {
@@ -37,6 +89,7 @@ namespace ShopEase.Shared.Services
                     cartItems.Remove(productId);
                 }
             }
+            _ = SaveCartToStorageAsync();
         }
 
         public void SetProductQuantity(int productId, int quantity)
@@ -53,8 +106,8 @@ namespace ShopEase.Shared.Services
                     cartItems[productId] = (existing, quantity);
                 }
             }
+            _ = SaveCartToStorageAsync();
         }
-
 
         public decimal CalculateTotal()
         {

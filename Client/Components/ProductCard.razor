@@ -1,13 +1,19 @@
 @using ShopEase.Shared.Models
 @using ShopEase.Shared.Services
+@using Microsoft.AspNetCore.Components.Authorization
+
 @inject CartService CartService
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div class="card shadow-sm mb-4" role="region" aria-labelledby="product-@Product.ProductID">
     <div class="card-body">
         <h5 id="product-@Product.ProductID" class="card-title text-primary fw-bold">@Product.Name</h5>
         <p class="card-text text-muted mb-1">Category: <span class="fw-semibold">@Product.Category</span></p>
         <p class="card-text mb-3">Price: <span class="text-success fw-semibold">$@Product.Price</span></p>
-        <button class="btn btn-outline-primary w-100" @onclick="AddToCart" aria-label="Add @Product.Name to cart">
+        <button class="btn btn-outline-primary w-100"
+                @onclick="AddToCart"
+                disabled="@(!isAuthenticated)"
+                aria-label="Add @Product.Name to cart">
             Add to Cart
         </button>
     </div>
@@ -17,8 +23,19 @@
     [Parameter]
     public Product Product { get; set; } = new Product();
 
+    private bool isAuthenticated;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+    }
+
     private void AddToCart()
     {
-        CartService.AddProduct(Product);
+        if (isAuthenticated)
+        {
+            CartService.AddProduct(Product);
+        }
     }
 }

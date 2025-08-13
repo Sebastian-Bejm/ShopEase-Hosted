@@ -2,17 +2,18 @@
 
 @using ShopEase.Shared.Models
 @using ShopEase.Client.Components
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div class="container">
     <h3 class="mb-4">Shop</h3>
 
-    <AuthorizeView>
-        <NotAuthorized>
-            <div class="alert alert-warning mb-4">
-                Please <a href="/login">log in</a> to add products to your cart.
-            </div>
-        </NotAuthorized>
-    </AuthorizeView>
+    @if (isAuthChecked && !isAuthenticated)
+    {
+        <div class="alert alert-warning mb-4">
+            Please <a href="/login">log in</a> to add products to your cart.
+        </div>
+    }
 
     <div class="product-grid">
         @foreach (var product in products)
@@ -22,11 +23,12 @@
             </div>
         }
     </div>
-
 </div>
 
-
 @code {
+    private bool isAuthenticated = false;
+    private bool isAuthChecked = false;
+
     private List<Product> products = new()
     {
         new Product { ProductID = 1, Name = "Laptop", Price = 999.99m, Category = "Electronics" },
@@ -34,4 +36,11 @@
         new Product { ProductID = 3, Name = "Sneakers", Price = 79.99m, Category = "Footwear" },
         new Product { ProductID = 4, Name = "Coffee Mug", Price = 12.50m, Category = "Kitchen" }
     };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+        isAuthChecked = true;
+    }
 }

@@ -1,4 +1,8 @@
-﻿<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3" role="navigation" aria-label="Main navigation">
+﻿@using Microsoft.AspNetCore.Components.Authorization
+
+@inject AuthenticationStateProvider AuthStateProvider
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3" role="navigation" aria-label="Main navigation">
     <a class="navbar-brand" href="">ShopEaseApp</a>
     <button class="navbar-toggler"
             type="button"
@@ -20,6 +24,25 @@
             <li class="nav-item">
                 <NavLink class="nav-link" href="cart">My Cart</NavLink>
             </li>
+            <AuthorizeView>
+                <Authorized>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Identity/Account/Manage">Hello, @userName</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Identity/Account/Logout">Logout</a>
+                    </li>
+                </Authorized>
+                <NotAuthorized>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Identity/Account/Login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Identity/Account/Register">Register</a>
+                    </li>
+                </NotAuthorized>
+            </AuthorizeView>
+
         </ul>
     </div>
 </nav>
@@ -27,6 +50,18 @@
 
 @code {
     private bool collapseNavMenu = true;
+    private string? userName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            userName = user.Identity.Name;
+        }
+    }
 
     private void ToggleNavMenu()
     {

@@ -2,7 +2,7 @@
 @using ShopEase.Shared.Services
 @using Microsoft.AspNetCore.Components.Authorization
 
-@inject CartService CartService
+@inject CartServiceWrapper CartWrapper
 @inject AuthenticationStateProvider AuthStateProvider
 
 <div class="card shadow-sm mb-4" role="region" aria-labelledby="product-@Product.ProductID">
@@ -24,18 +24,21 @@
     public Product Product { get; set; } = new Product();
 
     private bool isAuthenticated;
+    private CartService? cart;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+
+        cart = await CartWrapper.GetCartServiceAsync();
     }
 
     private void AddToCart()
     {
-        if (isAuthenticated)
+        if (isAuthenticated && cart != null)
         {
-            CartService.AddProduct(Product);
+            cart.AddProduct(Product);
         }
     }
 }

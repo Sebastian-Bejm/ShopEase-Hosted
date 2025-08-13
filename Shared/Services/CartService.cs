@@ -3,6 +3,7 @@ using System.Linq;
 using ShopEase.Shared.Models;
 using Microsoft.JSInterop;
 using System.Threading.Tasks;
+using System;
 
 namespace ShopEase.Shared.Services
 {
@@ -20,11 +21,13 @@ namespace ShopEase.Shared.Services
         cartItems.Select(kvp => (kvp.Key, kvp.Value.Product, kvp.Value.Quantity));
 
         private readonly IJSRuntime js;
-        private const string StorageKey = "cartItems";
+        private readonly string userId;
+        private string StorageKey => $"cartItems_{userId}";
 
-        public CartService(IJSRuntime jsRuntime)
+        public CartService(IJSRuntime jsRuntime, string userId)
         {
             js = jsRuntime;
+            this.userId = userId;
             LoadCartFromStorage();
         }
 
@@ -114,4 +117,5 @@ namespace ShopEase.Shared.Services
             return cartItems.Values.Sum(item => item.Product.Price * item.Quantity);
         }
     }
+
 }

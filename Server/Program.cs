@@ -30,13 +30,24 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 })
 .AddErrorDescriber<CustomIdentityErrorDescriber>()
 .AddEntityFrameworkStores<ApplicationDbContext>()
-.AddDefaultTokenProviders(); // ✅ This is the key fix
+.AddDefaultTokenProviders(); 
 
 builder.Services.ConfigureApplicationCookie(options => {
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Strict;
     options.SlidingExpiration = true;
+});
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowBlazorClient", policy =>
+    {
+        policy.WithOrigins("https://localhost:5001") // or your client URL
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials(); // 👈 This is critical
+    });
 });
 
 builder.Services.AddAuthentication("Identity.Application")
@@ -64,6 +75,8 @@ app.UseRouting();
 
 app.UseAuthentication(); // If using Identity
 app.UseAuthorization();
+
+app.UseCors("AllowBlazorClient");
 
 app.MapRazorPages();
 app.MapControllers();

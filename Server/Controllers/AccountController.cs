@@ -1,20 +1,29 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ShopEase.Shared.Models;
 
 [Route("api/account")]
 [ApiController]
 public class AccountController : ControllerBase
 {
     [HttpGet("user")]
+    [Authorize]
     public IActionResult GetUser()
     {
-        var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
-        var userName = isAuthenticated ? User.Identity?.Name ?? "" : "";
+        var user = User;
 
-        return Ok(new
+        if (user.Identity?.IsAuthenticated ?? false)
         {
-            IsAuthenticated = isAuthenticated,
-            UserName = userName
+            return Ok(new UserInfo
+            {
+                IsAuthenticated = true,
+                UserName = user.Identity.Name
+            });
+        }
+
+        return Ok(new UserInfo
+        {
+            IsAuthenticated = false
         });
     }
 }

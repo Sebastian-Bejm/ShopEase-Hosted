@@ -3,20 +3,20 @@
 @using ShopEase.Shared.Services
 @using Microsoft.AspNetCore.Components.Authorization
 
-@inject CartService CartService
+@inject CartServiceWrapper CartWrapper
 
 <h3 class="mb-4">Your Cart</h3>
 
 <AuthorizeView>
     <Authorized>
-        @if (!CartService.CartItems.Any())
+        @if (cart == null || !cart.CartItems.Any())
         {
             <p>Your cart is empty.</p>
         }
         else
         {
             <div class="cart-grid">
-                @foreach (var item in CartService.CartItems)
+                @foreach (var item in cart.CartItems)
                 {
                     var product = item.Product;
                     var quantity = item.Quantity;
@@ -92,7 +92,7 @@
             }
 
             <div class="mt-4 text-end">
-                <h5>Total: <span class="text-success fw-bold">$@CartService.CalculateTotal().ToString("0.##")</span></h5>
+                <h5>Total: <span class="text-success fw-bold">$@cart.CalculateTotal().ToString("0.##")</span></h5>
             </div>
         }
     </Authorized>
@@ -104,9 +104,15 @@
 </AuthorizeView>
 
 @code {
+    private CartService? cart;
     private Product? productToRemove;
     private bool showConfirmation = false;
     private bool isQuantityZeroTriggered = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        cart = await CartWrapper.GetCartServiceAsync();
+    }
 
     private void PromptRemoveAll(Product product) {
         productToRemove = product;
@@ -114,8 +120,8 @@
     }
 
     private void ConfirmRemoveAll() {
-        if (productToRemove != null) {
-            CartService.SetProductQuantity(productToRemove.ProductID, 0);
+        if (productToRemove != null && cart != null) {
+            cart.SetProductQuantity(productToRemove.ProductID, 0);
         }
         CloseConfirmation();
     }
@@ -127,22 +133,24 @@
     }
 
     private void RemoveOne(int productId) {
-        CartService.RemoveProduct(productId);
+        cart?.RemoveProduct(productId);
     }
 
     private void UpdateQuantity(int productId, string? value)
     {
+        if (cart == null) return;
+
         if (int.TryParse(value, out int quantity))
         {
             if (quantity == 0)
             {
-                productToRemove = CartService.CartItems.FirstOrDefault(p => p.ProductID == productId).Product;
+                productToRemove = cart.CartItems.FirstOrDefault(p => p.ProductID == productId).Product;
                 showConfirmation = true;
                 isQuantityZeroTriggered = true;
             }
             else if (quantity > 0)
             {
-                CartService.SetProductQuantity(productId, quantity);
+                cart.SetProductQuantity(productId, quantity);
             }
         }
     }

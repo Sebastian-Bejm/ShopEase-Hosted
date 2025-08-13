@@ -1,10 +1,10 @@
-using System;
+/*using System;
 using System.Collections.Generic;
 using System.Linq;
 using ShopEase.Shared.Models;
-//using MySql.Data.MySqlClient;
+using MySql.Data.MySqlClient;
 
-/*namespace ShopEaseApp.Models
+namespace ShopEaseApp.Models
 {
     public class Cart {
         //private List<Product> cart = new List<Product>();

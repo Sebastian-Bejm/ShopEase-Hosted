@@ -66,19 +66,19 @@ ShopEase/
 |   ├── Components/            # ProductCard component
 │   ├── Pages/                 # Razor pages (Home, Login, Cart)
 │   ├── Shared/                # Shared UI components (NavMenu, Header)
-│   ├── Services/              # Frontend services (CartService, AuthService)
+│   ├── Services/              # Frontend services (CartServiceWrapper, AuthService)
 │   └── Program.cs             # Entry point for Blazor WebAssembly
 │
 ├── Server/                     # ASP.NET Core backend
-│   ├── Controllers/           # API endpoints
+│   ├── Controllers/           # API endpoints (AccountController)
 │   ├── Models/                # Identity and domain models
-│   ├── Services/              # Backend services (e.g., ProductService)
+│   ├── Services/              # Backend services
 │   ├── appsettings.json       # Configuration file
 │   └── Program.cs             # Entry point for ASP.NET Core
 │
 ├── Shared/                     # Shared models and logic
-│   ├── Models/                # Product, CartItem, etc.
-│   └── Services/              # Interfaces and shared service logic
+│   ├── Models/                # Product, UserInfo, etc.
+│   └── Services/              # CartService for cart management
 │
 ├── README.md                   # Project documentation
 └── ShopEase.sln                # Solution file

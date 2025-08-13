@@ -99,3 +99,9 @@ ShopEase/
      ```
 
 3. Navigate to https://localhost:5001 in your browser.
+
+## Remaining issues
+
+- After logging into a user account, the cart items or home page may not be updated immediately.
+  Switching between pages from the navivation bar resolves the issue and the appropriate information should be shown afterwards.
+  
